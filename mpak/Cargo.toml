@@ -1,0 +1,10 @@
+[package]
+name = "mpak"
+version = "0.1.0"
+authors = ["Benjamin Falk <benjamin.falk@yahoo.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dark_forge = { path = "../dark_forge" }
