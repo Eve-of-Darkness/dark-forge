@@ -49,19 +49,25 @@ impl Mpak {
             Some(info) => {
                 let mut out_buffer = Vec::with_capacity(info.decompressed_byte_size as usize);
                 let mut in_buffer = vec![0; info.compressed_byte_size as usize];
-                let mut file = self.file.take().unwrap();
-                let file_pos = SeekFrom::Start((5 + (4 * 4) + self.name_compressed_size + self.dir_compressed_size + info.file_offset) as u64);
-                file.seek(file_pos).unwrap();
+                let mut file = self.file.as_ref().take().unwrap();
+                file.seek(self.to_file_info_offset(info)).unwrap();
                 file.read_exact(&mut in_buffer).unwrap();
                 let mut decoder = ZlibDecoder::new(&in_buffer[..]);
                 decoder.read_to_end(&mut out_buffer).unwrap();
-                self.file = Some(file);
                 Some(out_buffer)
             }
         }
     }
 
+    pub fn file_names(&self) -> Vec<&String> {
+        self.file_info.keys().collect()
+    }
+
     // Private functions
+
+    fn to_file_info_offset(&self, info: &FileInfo) -> SeekFrom {
+        SeekFrom::Start((21 + self.name_compressed_size + self.dir_compressed_size + info.file_offset) as u64)
+    }
 
     fn read_file_details(file: &mut File, buffer_size: u32) -> Result<InfoCollection, Error> {
         let mut buffer = vec![0; buffer_size as usize];

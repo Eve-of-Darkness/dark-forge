@@ -1,4 +1,4 @@
-use dark_forge::mpk::{Mpak, Error};
+use dark_forge::mpk::{Mpak, Error, FileInfo};
 use clap::Clap;
 use std::io::{self, Write};
 
@@ -23,10 +23,18 @@ struct CatFiles {
     files: Vec<String>,
 }
 
+/// Unzip contents to files
+#[derive(Clap)]
+struct Unzip {
+    /// Optional directory to unpack files to
+    dir: Option<String>
+}
+
 #[derive(Clap)]
 enum SubCommand {
     Ls(ListContents),
     Cat(CatFiles),
+    Unzip(Unzip)
 }
 
 trait MpakCommand {
@@ -35,10 +43,10 @@ trait MpakCommand {
 
 impl MpakCommand for ListContents {
     fn run(self, mpak: Mpak) {
-        let mut keys: Vec<&String> = mpak.file_info.keys().collect();
-        keys.sort();
-        for key in keys {
-            println!("{}", key);
+        let mut filenames = mpak.file_names();
+        filenames.sort();
+        for file in filenames {
+            println!("{}", file);
         }
     }
 }
@@ -54,6 +62,26 @@ impl MpakCommand for CatFiles {
                     io::stdout().write_all(&data).unwrap();
                 }
             }
+        }
+    }
+}
+
+impl MpakCommand for Unzip {
+    fn run(self, mpak: Mpak) {
+        let mut mpak = mpak;
+        let dir = self.dir.unwrap_or(mpak.name.clone());
+        std::fs::create_dir_all(&dir).unwrap();
+        let mut names = vec![];
+
+        for name in mpak.file_names() {
+            names.push(name.clone());
+        }
+
+        for filename in names {
+            let contents = mpak.file_contents(&filename).unwrap();
+            let filename = format!("{}/{}", &dir, &filename);
+            let mut file = std::fs::File::create(&filename).unwrap();
+            file.write_all(&contents).unwrap();
         }
     }
 }
