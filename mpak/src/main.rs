@@ -1,9 +1,17 @@
-use dark_forge::mpk::{Mpak, Error, FileInfo};
+use dark_forge::mpk::{Mpak, Error};
 use clap::Clap;
 use std::io::{self, Write};
 
+/// A simple tool to work with mpk files found in
+/// the Dark Age of Camelot game client.  This is
+/// a proprietary compression format which can
+/// contain any number of files in a single archive.
+///
+/// This tools is designed to work with a single
+/// file at a time and has sub-commands to perform
+/// different actions.
 #[derive(Clap)]
-#[clap(author = "Ben Falk <benjamin.falk@yahoo.com>")]
+#[clap(author = "Ben Falk <benjamin.falk@yahoo.com>", version = "0.1.0")]
 struct Opts {
     /// The file to work with
     file: String,
@@ -20,6 +28,7 @@ struct ListContents {
 /// Copy contents to stdout
 #[derive(Clap)]
 struct CatFiles {
+    /// which file(s) to stream to stdout
     files: Vec<String>,
 }
 
@@ -52,9 +61,7 @@ impl MpakCommand for ListContents {
 }
 
 impl MpakCommand for CatFiles {
-    fn run(self, mpak: Mpak) {
-        let mut mpak = mpak;
-
+    fn run(self, mut mpak: Mpak) {
         for file in self.files {
             match mpak.file_contents(&file) {
                 None => eprintln!("File {} Not Found", &file),
@@ -67,8 +74,7 @@ impl MpakCommand for CatFiles {
 }
 
 impl MpakCommand for Unzip {
-    fn run(self, mpak: Mpak) {
-        let mut mpak = mpak;
+    fn run(self, mut mpak: Mpak) {
         let dir = self.dir.unwrap_or(mpak.name.clone());
         std::fs::create_dir_all(&dir).unwrap();
         let mut names = vec![];
@@ -97,6 +103,7 @@ fn main() {
             match opts.subcmd {
                 SubCommand::Ls(cmd) => cmd.run(mpak),
                 SubCommand::Cat(cmd) => cmd.run(mpak),
+                SubCommand::Unzip(cmd) => cmd.run(mpak),
             }
         }
     }
