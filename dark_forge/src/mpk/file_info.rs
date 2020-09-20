@@ -3,6 +3,12 @@ use std::mem::transmute;
 const TOTAL_FILE_BYTE_SIZE: usize = 284;
 const FILE_DETAIL_POS: usize = 256;
 
+/// Information of Archived File
+///
+/// This represents a segment from the Mpak directory
+/// header detailing information on a file contained
+/// in the archive.
+///
 #[derive(Debug)]
 pub struct FileInfo {
     pub name: String,
@@ -16,6 +22,14 @@ pub struct FileInfo {
 }
 
 impl FileInfo {
+    /// From Bytes
+    ///
+    /// The file information portion of the Mpak archive is
+    /// segmented into 284 byte sized portions.  This method
+    /// expects to receive a slice of bytes covering that
+    /// from beginning to end and returns a `FileInfo` struct
+    /// with the relevant data loaded.
+    ///
     pub fn from_bytes(bytes: &[u8]) -> Self {
         if bytes.len() < TOTAL_FILE_BYTE_SIZE {
             panic!("FileInfo bytes must be at least {} bytes!", TOTAL_FILE_BYTE_SIZE);
@@ -41,6 +55,11 @@ impl FileInfo {
         }
     }
 
+    /// Raw Byte Size
+    ///
+    /// This is the number of bytes expected to be found
+    /// in the file for a given `FileInfo`
+    ///
     pub fn raw_byte_size() -> usize { TOTAL_FILE_BYTE_SIZE }
 
     // Private Functions

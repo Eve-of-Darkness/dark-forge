@@ -7,6 +7,13 @@ use super::{Error, FileInfo};
 
 pub type InfoCollection = HashMap<String, FileInfo>;
 
+/// Mpak Archive
+///
+/// The archive info as well as the file handle for a
+/// Mpak archive.  Some of the raw parts of the header
+/// info are kept as separate fields instead of re-reading
+/// or calculating them all the time.
+///
 #[derive(Debug)]
 pub struct Mpak {
     pub file: Option<File>,
@@ -19,6 +26,12 @@ pub struct Mpak {
 }
 
 impl Mpak {
+    /// Open Archive
+    ///
+    /// Given a valid path to a mpak archive; this will return a new
+    /// `Mpak` struct loaded with the file header info and an open
+    /// file handle to the archive.
+    ///
     pub fn open(filename: &str) -> Result<Self, Error> {
         let mut file = File::open(filename)?;
         file.seek(SeekFrom::Start(5))?;
@@ -43,7 +56,14 @@ impl Mpak {
         })
     }
 
+    /// File Contents
+    ///
+    /// Given a filename string reference; this will return a potential
+    /// buffer of the decompressed contents in the file if it is found.
+    ///
     pub fn file_contents(&mut self, filename: &str) -> Option<Vec<u8>> {
+        if self.file.is_none() { return None; }
+
         match self.file_info.get(filename) {
             None => None,
             Some(info) => {
@@ -59,6 +79,12 @@ impl Mpak {
         }
     }
 
+    /// File Names
+    ///
+    /// Provides a collection of string references to the names of the
+    /// files compressed in this mpak archive.  If you want to keep a
+    /// hold of these for future use you may want to clone them.
+    ///
     pub fn file_names(&self) -> Vec<&String> {
         self.file_info.keys().collect()
     }
