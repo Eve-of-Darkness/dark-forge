@@ -11,7 +11,7 @@ use std::io::{self, Write};
 /// file at a time and has sub-commands to perform
 /// different actions.
 #[derive(Clap)]
-#[clap(author = "Ben Falk <benjamin.falk@yahoo.com>", version = "0.1.0")]
+#[clap(author = "Ben Falk <benjamin.falk@yahoo.com>", version = "0.1.1")]
 struct Opts {
     /// The file to work with
     file: String,
@@ -62,11 +62,22 @@ impl MpakCommand for ListContents {
 
 impl MpakCommand for CatFiles {
     fn run(self, mut mpak: Mpak) {
+        use io::ErrorKind::BrokenPipe;
+
         for file in self.files {
             match mpak.file_contents(&file) {
                 None => eprintln!("File {} Not Found", &file),
                 Some(data) => {
-                    io::stdout().write_all(&data).unwrap();
+                    match io::stdout().write_all(&data) {
+                        Ok(()) => (),
+                        Err(error) => {
+                            if error.kind() == BrokenPipe {
+                                ()
+                            } else {
+                                panic!("{:?}", error)
+                            }
+                        }
+                    }
                 }
             }
         }
