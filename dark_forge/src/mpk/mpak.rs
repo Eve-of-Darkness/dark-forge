@@ -62,21 +62,15 @@ impl Mpak {
     /// buffer of the decompressed contents in the file if it is found.
     ///
     pub fn file_contents(&mut self, filename: &str) -> Option<Vec<u8>> {
-        if self.file.is_none() { return None; }
-
-        match self.file_info.get(filename) {
-            None => None,
-            Some(info) => {
-                let mut out_buffer = Vec::with_capacity(info.decompressed_byte_size as usize);
-                let mut in_buffer = vec![0; info.compressed_byte_size as usize];
-                let mut file = self.file.as_ref().take().unwrap();
-                file.seek(self.to_file_info_offset(info)).unwrap();
-                file.read_exact(&mut in_buffer).unwrap();
-                let mut decoder = ZlibDecoder::new(&in_buffer[..]);
-                decoder.read_to_end(&mut out_buffer).unwrap();
-                Some(out_buffer)
-            }
-        }
+        let mut file = self.file.as_ref()?;
+        let info = self.file_info.get(filename)?;
+        let mut out_buffer = Vec::with_capacity(info.decompressed_byte_size as usize);
+        let mut in_buffer = vec![0; info.compressed_byte_size as usize];
+        file.seek(self.to_file_info_offset(info)).unwrap();
+        file.read_exact(&mut in_buffer).unwrap();
+        let mut decoder = ZlibDecoder::new(&in_buffer[..]);
+        decoder.read_to_end(&mut out_buffer).unwrap();
+        Some(out_buffer)
     }
 
     /// File Names
@@ -126,8 +120,8 @@ impl Mpak {
     fn read_next_u32(file: &mut File, xor_byte: &mut u8) -> Result<u32, Error> {
         let mut bytes: [u8; 4] = [0; 4];
         file.read_exact(&mut bytes)?;
-        for byte in 0..4 {
-            bytes[byte] = bytes[byte] ^ *xor_byte;
+        for byte in &mut bytes {
+            *byte ^= *xor_byte;
             *xor_byte += 1;
         }
 

@@ -71,9 +71,7 @@ impl MpakCommand for CatFiles {
                     match io::stdout().write_all(&data) {
                         Ok(()) => (),
                         Err(error) => {
-                            if error.kind() == BrokenPipe {
-                                ()
-                            } else {
+                            if error.kind() != BrokenPipe {
                                 panic!("{:?}", error)
                             }
                         }
@@ -86,7 +84,7 @@ impl MpakCommand for CatFiles {
 
 impl MpakCommand for Unzip {
     fn run(self, mut mpak: Mpak) {
-        let dir = self.dir.unwrap_or(mpak.name.clone());
+        let dir = self.dir.unwrap_or_else(|| mpak.name.clone());
         std::fs::create_dir_all(&dir).unwrap();
         let mut names = vec![];
 

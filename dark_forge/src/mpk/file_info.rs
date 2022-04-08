@@ -45,13 +45,13 @@ impl FileInfo {
         Self {
             name,
             // Please note the order of these calls *is* important
-            timestamp: Self::read_next_u32(&bytes, &mut pos),
-            unknown: Self::read_next_u32(&bytes, &mut pos),
-            memory_offset: Self::read_next_u32(&bytes, &mut pos),
-            decompressed_byte_size: Self::read_next_u32(&bytes, &mut pos),
-            file_offset: Self::read_next_u32(&bytes, &mut pos),
-            compressed_byte_size: Self::read_next_u32(&bytes, &mut pos),
-            compressed_crc32: Self::read_next_u32(&bytes, &mut pos),
+            timestamp: Self::read_next_u32(bytes, &mut pos),
+            unknown: Self::read_next_u32(bytes, &mut pos),
+            memory_offset: Self::read_next_u32(bytes, &mut pos),
+            decompressed_byte_size: Self::read_next_u32(bytes, &mut pos),
+            file_offset: Self::read_next_u32(bytes, &mut pos),
+            compressed_byte_size: Self::read_next_u32(bytes, &mut pos),
+            compressed_crc32: Self::read_next_u32(bytes, &mut pos),
         }
     }
 
