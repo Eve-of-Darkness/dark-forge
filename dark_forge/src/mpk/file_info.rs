@@ -32,7 +32,7 @@ impl FileInfo {
     ///
     pub fn from_bytes(bytes: &[u8]) -> Self {
         if bytes.len() < TOTAL_FILE_BYTE_SIZE {
-            panic!("FileInfo bytes must be at least {} bytes!", TOTAL_FILE_BYTE_SIZE);
+            panic!("FileInfo bytes must be at least {TOTAL_FILE_BYTE_SIZE} bytes!");
         }
 
         let mut pos: usize = 0;

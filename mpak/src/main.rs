@@ -1,5 +1,5 @@
 use dark_forge::mpk::{Mpak, Error};
-use clap::Clap;
+use clap::Parser;
 use std::io::{self, Write};
 
 /// A simple tool to work with mpk files found in
@@ -10,7 +10,7 @@ use std::io::{self, Write};
 /// This tools is designed to work with a single
 /// file at a time and has sub-commands to perform
 /// different actions.
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(author = "Ben Falk <benjamin.falk@yahoo.com>", version = "0.1.1")]
 struct Opts {
     /// The file to work with
@@ -21,25 +21,25 @@ struct Opts {
 }
 
 /// List the contents of the mpak file
-#[derive(Clap)]
+#[derive(Parser)]
 struct ListContents {
 }
 
 /// Copy contents to stdout
-#[derive(Clap)]
+#[derive(Parser)]
 struct CatFiles {
     /// which file(s) to stream to stdout
     files: Vec<String>,
 }
 
 /// Unzip contents to files
-#[derive(Clap)]
+#[derive(Parser)]
 struct Unzip {
     /// Optional directory to unpack files to
     dir: Option<String>
 }
 
-#[derive(Clap)]
+#[derive(Parser)]
 enum SubCommand {
     Ls(ListContents),
     Cat(CatFiles),
